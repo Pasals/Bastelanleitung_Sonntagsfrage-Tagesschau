@@ -1,0 +1,82 @@
+<h1>Bastelanleitung_Sonntagsfrage-Tagesschau</h1>
+
+#### Stichwort Bundestagswahl #### <br /> 
+#### 22. Sept 21 #### <br /> 
+
+### Felder mit XXX müssen selbst ausgefüllt werden<br /> 
+<br /> 
+rm(list = ls())<br /> 
+library(magick)<br /> 
+library(ggthemes)<br /> 
+library(ggplot2)<br /> 
+library(jpeg)<br /> 
+library(grid)<br /> 
+library(tidyverse)<br /> 
+<br /> 
+## Daten runterladen<br /> 
+setwd("XXX") # Anpassen! Der Ordner in dem alle benötigten Daten liegen.<br /> 
+<br /> 
+dt <- read.csv2("XXX") #Datensatz einfügen<br /> 
+dt[dt < -10] <- NA #ggfs. anpassen<br /> 
+<br /> 
+## Daten vorbereiten
+dt$Partei<-as.factor(dt$XXX) #Variablenname für Sonntagsfrage einfügen<br /> 
+dtbppartei<-dt<br /> 
+dtbppartei$Partei<-dplyr::na_if(dtbppartei$Partei, NA)<br /> 
+dtbppartei<-subset(dtbppartei, !is.na(Partei))<br /> 
+<br /> 
+<br /> 
+## Bilder runterladen<br /> 
+#Source: https://htmlcolorcodes.com/ <br /> 
+#Fabcodes wurden über den Firefox Color-Picker identifiziert<br /> 
+imgage1 <- readJPEG("IMG_6357.jpg") <br /> 
+imgage2 <- readJPEG("IMG_6352.jpg") <br /> 
+imgage3 <- readJPEG("IMG_6358.jpg")<br /> 
+imgage4 <- readJPEG("IMG_6360.jpg")<br /> 
+imgage5 <- readJPEG("IMG_6359.jpg")<br /> 
+<br /> 
+## Count in Prozentzahlen umwandeln<br /> 
+plotdata <- dtbppartei %>%<br /> 
+  count(Partei) %>%<br /> 
+  mutate(pct = n / sum(n)*100,<br /> 
+         pctlabel = paste0(round(pct))) #"%")) #,it oder ohne Prozentzahl<br /> 
+<br /> 
+## Ordnen der Parteien<br /> 
+x.ordered <- factor(plotdata$Partei, levels=c("1", "2", "6", "4", "5", "3", "7"))<br /> 
+<br /> 
+a<-ggplot(plotdata, aes(x = x.ordered, <br /> 
+                        y = pct,<br /> 
+                        fill = Partei)) + <br /> 
+  annotation_custom(rasterGrob(imgage1, width=unit(1,"npc"),  height=unit(1,"npc")), -Inf, Inf, 1, 35) +<br /> 
+  annotation_custom(rasterGrob(imgage2, width=unit(1,"npc"),  height=unit(1,"npc")), -2, 10, -3, 1) +<br /> 
+  geom_bar(stat = "identity", colour="white", width = 0.8) +<br /> 
+  theme_economist(base_size = 10) +<br /> 
+  annotation_custom(rasterGrob(imgage1, width=unit(1,"npc"),  height=unit(1,"npc")), -Inf, Inf, 1, 2) +<br /> 
+  annotation_custom(rasterGrob(imgage2, width=unit(1,"npc"),  height=unit(1,"npc")), -2, 10, 35.5, 39.0) +<br /> 
+  annotation_custom(rasterGrob(imgage3, width=unit(1,"npc"),  height=unit(1,"npc")), -2, 10, 39.0, 42.5) +<br /> 
+  annotation_custom(rasterGrob(imgage4, width=unit(1,"npc"),  height=unit(1,"npc")), -2, 10, 33.0, 35.5) +<br /> 
+  annotation_custom(rasterGrob(imgage5, width=unit(1,"npc"),  height=unit(1,"npc")), -2, 10, -5.2, -3) + <br /> 
+  ylim(-5, 42) +<br /> 
+  labs(x="", <br /> 
+       y="",<br /> 
+       title="EPKO-Studie - Herbst 2020",<br /> 
+       subtitle="Sonntagsfrage zur Bundestagswahl") +<br /> 
+  geom_text(aes(label = pctlabel), fontface="bold",<br /> 
+            y = -4, size = 5, colour="black", vjust = 'center') +<br /> 
+  theme(axis.title = element_text(), axis.title.x=element_blank(), <br /> 
+        axis.text.x = element_text(margin = margin(-60,0,20,0), size = 14, face="bold"),<br /> 
+        axis.text.y = element_blank(),<br /> 
+        axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0), size = 16),<br /> 
+        plot.background = element_rect(fill = "#b3d5f1"),<br /> 
+        legend.position="none",<br /> 
+        plot.subtitle=element_text(family = "sans", size=18, hjust=0.03, color="black",face="bold", vjust = -3.5, margin=margin(0,0,-55,0)),<br /> 
+        plot.title = element_text(family = "sans", size = 18, hjust=0.03, colour="white", vjust = 0, face="bold", margin=margin(0,0,0,0)))  +<br /> 
+  xlab("class") +<br /> 
+  theme(legend.position="none") +<br /> 
+  annotate(geom="text", x=5, y=22, label="EPKO-Studie",color="red", fontface='bold', size=16, alpha = 0.2) +<br /> 
+  scale_x_discrete(breaks=1:7, labels=c("CDU","SPD","Grüne","FDP", "Linke","AfD","Andere")) +<br /> 
+  scale_fill_manual(values=c("#32302e", "#E3000F", "#64A12D",  "#ffed00", "#B1003A",  "#009ee0","grey")) #Source: Jeweilige Web-Präsenz der Parteien<br /> 
+a<br /> 
+ggsave("BTW.emf", a, dpi = 300, units = "in", device='png') #Speichert Plot als emf Datei<br /> 
+<br /> 
+<br /> 
